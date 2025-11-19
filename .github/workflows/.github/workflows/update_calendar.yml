@@ -1,0 +1,39 @@
+name: Mise à jour Radar Salles
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Tourne à la minute 0 de chaque heure
+  workflow_dispatch:      # Permet de lancer manuellement pour tester
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Récupération du code
+      uses: actions/checkout@v3
+
+    - name: Installation de Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Installation des dépendances
+      run: |
+        pip install -r requirements.txt
+
+    - name: Lancement du Radar
+      run: |
+        python radar_salles.py
+
+    - name: Sauvegarde du fichier ICS
+      run: |
+        git config --global user.name "RadarBot"
+        git config --global user.email "bot@noreply.github.com"
+        git add salles_libres.ics
+        # On ne commit que si le fichier a changé
+        git commit -m "Mise à jour auto des salles" || echo "Pas de changement"
+        git push
